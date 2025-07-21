@@ -30,11 +30,11 @@ const HabitModal = ({ visible, onClose, onGuardar, habitToEdit }) => {
             {habitToEdit ? 'Editar hábito' : 'Nuevo hábito'}
           </Text>
           <TextInput
-            style={styles.input}
-            placeholder="Escribe el hábito..."
-            value={nombre}
-            onChangeText={setNombre}
-            autoFocus={true}
+             value={nombre}
+             onChangeText={setNombre}
+             placeholder="Nombre del hábito"
+             maxLength={30}  // ✅ Esto limita la longitud
+             style={styles.input}
           />
           <View style={styles.botones}>
             <Button title="Cancelar" onPress={onClose} />

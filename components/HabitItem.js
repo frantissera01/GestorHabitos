@@ -1,53 +1,42 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-// HabitItem.js
-import moment from 'moment';
-
-// Calcula cuántos días seguidos se ha completado un hábito
-const calcularRacha = (fechasCompletadas) => {
-  const hoy = moment().startOf('day');
-  let racha = 0;
-
-  // Ordenar por fecha descendente
-  const fechasOrdenadas = fechasCompletadas
-    .map(f => moment(f))
-    .sort((a, b) => b.diff(a));
-
-  for (let i = 0; i < fechasOrdenadas.length; i++) {
-    const diferencia = hoy.diff(fechasOrdenadas[i], 'days');
-
-    if (diferencia === i) {
-      racha++;
-    } else {
-      break;
-    }
-  }
-
-  return racha;
-};
-
+import { calcularRacha } from '../utils/habitUtils';
+import { ScrollView } from 'react-native';
 
 const HabitItem = ({ habito, onEditar, onEliminar, onToggle }) => {
+  const esDeHoy = () => {
+    const hoy = new Date().toISOString().split('T')[0];
+    return habito.fechas?.includes(hoy);
+  };
+
   return (
-    <View style={styles.container}>
-      <TouchableOpacity
-        onPress={() => onToggle(habito.id)}
-        style={styles.nombreContainer}
-        testID={`toggle-${habito.id}`}
-      >
-        <Text style={[styles.nombre, habito.completado && styles.completado]}>
-          {habito.texto}
-        </Text>
-         <Text style={styles.racha}>
-          🔥 Racha: {calcularRacha(habito.fechas || [])} días
-        </Text>
-      </TouchableOpacity>
+    <View style={{ flex: 1}}>
+      <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+        <Text style={styles.nombreTexto}>{habito.nombre}</Text>
+      </ScrollView>
+      
+      <Text style={styles.racha}>
+        🔥 Racha: {calcularRacha(habito.fechas || [])} días
+      </Text>
 
       <View style={styles.acciones}>
-        <TouchableOpacity onPress={() => onEditar(habito)}>
+       <TouchableOpacity
+          onPress={() => onToggle(habito.id)}
+          style={[
+            styles.botonCompletar,
+            esDeHoy() && styles.botonDesmarcar
+          ]}
+        >
+          <Text style={{color: esDeHoy() ? '#f44336' : '#4CAF50'}}>
+            {esDeHoy() ? 'Desmarcar' : 'Completado'}
+          </Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity onPress={() => onEditar(habito)} style={styles.botonEditar}>
           <Ionicons name="create-outline" size={20} color="#4caf50" />
         </TouchableOpacity>
+
         <TouchableOpacity onPress={() => onEliminar(habito.id)} style={styles.botonEliminar}>
           <Ionicons name="trash-outline" size={20} color="#f44336" />
         </TouchableOpacity>
@@ -62,6 +51,8 @@ const styles = StyleSheet.create({
     padding: 12,
     marginVertical: 6,
     borderRadius: 10,
+    flex: 1,
+    flexWrap: 'nowrap',
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
@@ -72,24 +63,38 @@ const styles = StyleSheet.create({
     marginTop: 4
   },
   nombreContainer: {
-    flex: 1,
+    maxWidth: '70%',  // o el % que quieras
+    overflow: 'hidden',
   },
-  nombre: {
-    fontSize: 18,
-    color: '#333',
+  nombreTexto: {
+    fontSize: 16,
+    paddingRight: 10,
+    color: 'black',
   },
   completado: {
-    textDecorationLine: 'line-through',
-    color: '#888',
+    color: '#4CAF50',
   },
   acciones: {
     flexDirection: 'row',
     gap: 12,
     marginLeft: 12,
   },
+  botonCompletar: {
+    marginRight: 15,
+    paddingVertical: 6,
+    paddingHorizontal: 10,
+    backgroundColor: '#d0f0d0',
+    borderRadius: 6,
+  },
   botonEliminar: {
     marginLeft: 10,
   },
+  botonDesmarcar: {
+  borderColor: '#f44336',
+  borderWidth: 1,
+},
+
 });
 
 export default HabitItem;
+
