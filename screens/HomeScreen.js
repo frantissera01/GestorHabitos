@@ -81,8 +81,9 @@ export default function HomeScreen() {
     } else {
       const nuevo = {
         ...nuevoHabito,
-        id:Date.now(),
-        completado:false,
+        id: Date.now(),
+        completado: false,
+        fechasCompletadas: [],
       };
       const nuevosHabitos = [...habitos, nuevo];
       setHabitos(nuevosHabitos);
@@ -98,14 +99,15 @@ export default function HomeScreen() {
 
     const nuevosHabitos = habitos.map((habito) => {
       if (habito.id === id) {
-        const yaMarcado = habito.fechas?.includes(hoy);
+        const yaMarcado = habito.fechasCompletadas?.includes(hoy);
 
         return {
           ...habito,
-          fechas: yaMarcado
-            ? habito.fechas.filter((f) => f !== hoy) // si ya estaba, lo quitamos
-            : [...(habito.fechas || []), hoy],       // si no estaba, lo agregamos
+          fechasCompletadas: yaMarcado
+            ? habito.fechasCompletadas.filter((f) => f !== hoy)
+            : [...(habito.fechasCompletadas || []), hoy],
         };
+
       }
       return habito;
     });
