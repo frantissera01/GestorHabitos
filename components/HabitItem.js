@@ -1,6 +1,32 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+// HabitItem.js
+import moment from 'moment';
+
+// Calcula cuántos días seguidos se ha completado un hábito
+const calcularRacha = (fechasCompletadas) => {
+  const hoy = moment().startOf('day');
+  let racha = 0;
+
+  // Ordenar por fecha descendente
+  const fechasOrdenadas = fechasCompletadas
+    .map(f => moment(f))
+    .sort((a, b) => b.diff(a));
+
+  for (let i = 0; i < fechasOrdenadas.length; i++) {
+    const diferencia = hoy.diff(fechasOrdenadas[i], 'days');
+
+    if (diferencia === i) {
+      racha++;
+    } else {
+      break;
+    }
+  }
+
+  return racha;
+};
+
 
 const HabitItem = ({ habito, onEditar, onEliminar, onToggle }) => {
   return (
@@ -12,6 +38,9 @@ const HabitItem = ({ habito, onEditar, onEliminar, onToggle }) => {
       >
         <Text style={[styles.nombre, habito.completado && styles.completado]}>
           {habito.texto}
+        </Text>
+         <Text style={styles.racha}>
+          🔥 Racha: {calcularRacha(habito.fechas || [])} días
         </Text>
       </TouchableOpacity>
 
@@ -36,6 +65,11 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
+  },
+  racha: {
+    fontSize: 14,
+    color: 'orange',
+    marginTop: 4
   },
   nombreContainer: {
     flex: 1,
