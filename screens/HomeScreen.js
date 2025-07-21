@@ -93,14 +93,27 @@ export default function HomeScreen() {
   };
 
   // Toggle completado
-  const handleToggleCompletado = async (id) => {
-    try {
-      const actualizados = await marcarCompletado(id);
-      setHabitos(actualizados);
-    } catch (e) {
-      setError('Error al marcar completado');
-    }
+  const handleToggleCompletado = (id) => {
+    const hoy = new Date().toISOString().split('T')[0]; // formato YYYY-MM-DD
+
+    const nuevosHabitos = habitos.map((habito) => {
+      if (habito.id === id) {
+        const yaMarcado = habito.fechas?.includes(hoy);
+
+        return {
+          ...habito,
+          fechas: yaMarcado
+            ? habito.fechas.filter((f) => f !== hoy) // si ya estaba, lo quitamos
+            : [...(habito.fechas || []), hoy],       // si no estaba, lo agregamos
+        };
+      }
+      return habito;
+    });
+
+    setHabitos(nuevosHabitos);
+    guardarHabitos(nuevosHabitos); // persistir
   };
+
 
   // Abrir modal nuevo o editar
   const abrirModalNuevo = () => {
