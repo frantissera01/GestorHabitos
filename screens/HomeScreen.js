@@ -13,7 +13,7 @@ import HabitItem from '../components/HabitItem';
 import HabitModal from '../components/HabitModal';
 import HabitCalendar from './HabitCalendar';
 import { eliminarHabito } from '../services/habitService';
-import { cargarHabitos, guardarHabitos } from '../storage/habitStorage';
+import { guardarHabitos, cargarHabitos } from '../storage/habitStorage';
 
 export default function HomeScreen() {
   const [habitos, setHabitos] = useState([]);
@@ -24,8 +24,9 @@ export default function HomeScreen() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+
   // Cargar hábitos
-  const cargarYSetHabitos = async () => {
+  const cargarYSetearHabitos = async () => {
     try {
       setLoading(true);
       const cargados = await cargarHabitos();
@@ -38,9 +39,10 @@ export default function HomeScreen() {
     }
   };
 
+  useEffect(() => {
+    cargarYSetearHabitos();
+  }, []);
   
-
-
   // Eliminar hábito
   const handleEliminarHabito = async (id) => {
     try {

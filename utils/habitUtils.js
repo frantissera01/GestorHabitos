@@ -1,5 +1,5 @@
 export const calcularRacha = (fechasCompletadas) => {
-  if (!fechasCompletadas || fechasCompletadas.length === 0) return 0;
+  if (!Array.isArray(fechasCompletadas) || fechasCompletadas.length === 0) return 0;
 
   const fechas = fechasCompletadas
     .map(f => new Date(f))

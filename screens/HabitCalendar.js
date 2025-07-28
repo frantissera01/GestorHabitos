@@ -16,8 +16,8 @@ export default function HabitCalendar() {
         const fechas = {};
 
         habitos.forEach(habito => {
-          if (Array.isArray(habito.fechasCompletadas)) {
-            habito.fechasCompletadas.forEach(fecha => {
+          if (Array.isArray(habito.fechas)) {
+            habito.fechas.forEach(fecha => {
               fechas[fecha] = {
                 marked: true,
                 dotColor: '#00adf5',
@@ -25,10 +25,11 @@ export default function HabitCalendar() {
               };
             });
           }
+
         });
 
         setCompletedDates(fechas);
-        setRacha(calcularRacha(Object.keys(fechas)));
+        setRacha(calcularRacha(Object.keys(fechas || {})));
       } catch (error) {
         console.error('Error al cargar fechas de hábitos:', error);
       }
@@ -49,8 +50,8 @@ export default function HabitCalendar() {
 
       const nuevasFechas = {};
       habitosActualizados.forEach(hab => {
-        if (Array.isArray(hab.fechasCompletadas)) {
-          hab.fechasCompletadas.forEach(f => {
+        if (Array.isArray(hab.fechas)) {
+          hab.fechas.forEach(f => {
             nuevasFechas[f] = {
               marked: true,
               dotColor: '#00adf5',
@@ -58,10 +59,11 @@ export default function HabitCalendar() {
             };
           });
         }
+
       });
 
       setCompletedDates(nuevasFechas);
-      setRacha(calcularRacha(Object.keys(nuevasFechas)));
+      setRacha(calcularRacha(Object.keys(fechas || {})));
     } catch (error) {
       console.error('Error al alternar fecha del hábito:', error);
     }
