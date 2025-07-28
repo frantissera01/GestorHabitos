@@ -7,7 +7,7 @@ export const guardarHabitos = async (habitos) => {
   try {
     const datosConFechas = habitos.map((h) => ({
       ...h,
-      fechas: h.fechas || [], // nos aseguramos que cada hábito tenga un array de fechas
+      fechasCompletadas: h.fechasCompletadas || [],
     }));
 
     const json = JSON.stringify(datosConFechas);
@@ -25,7 +25,7 @@ export const cargarHabitos = async () => {
       const habitos = JSON.parse(json);
       return habitos.map((h) => ({
         ...h,
-        fechas: h.fechas || [], // si no tiene fechas, se inicializa como array vacío
+       fechasCompletadas: h.fechasCompletadas || [],
       }));
     } else {
       return [];

@@ -10,33 +10,20 @@ export default function HabitCalendar() {
   const [racha, setRacha] = useState(0);
 
   useEffect(() => {
-    const cargarFechas = async () => {
-      try {
-        const habitos = await cargarHabitos();
-        const fechas = {};
+    if (!habito || !Array.isArray(habito.fechas)) return;
 
-        habitos.forEach(habito => {
-          if (Array.isArray(habito.fechas)) {
-            habito.fechas.forEach(fecha => {
-              fechas[fecha] = {
-                marked: true,
-                dotColor: '#00adf5',
-                selectedColor: '#e0f7fa',
-              };
-            });
-          }
+    const fechas = {};
+    habito.fechas.forEach(fecha => {
+      fechas[fecha] = {
+        marked: true,
+        dotColor: '#00adf5',
+        selectedColor: '#e0f7fa',
+      };
+    });
 
-        });
-
-        setCompletedDates(fechas);
-        setRacha(calcularRacha(Object.keys(fechas || {})));
-      } catch (error) {
-        console.error('Error al cargar fechas de hábitos:', error);
-      }
-    };
-
-    cargarFechas();
-  }, []);
+    setCompletedDates(fechas);
+    setRacha(calcularRacha(Object.keys(fechas)));
+  }, [habito.fechas]);
 
   const manejarPresionDia = async (day) => {
     const fecha = day.dateString;
@@ -59,15 +46,15 @@ export default function HabitCalendar() {
             };
           });
         }
-
       });
 
-      setCompletedDates(nuevasFechas);
-      setRacha(calcularRacha(Object.keys(fechas || {})));
+      setCompletedDates(nuevasFechas); // ✅ actualiza el estado
+      setRacha(calcularRacha(Object.keys(nuevasFechas || {}))); // ✅ usa nuevasFechas
     } catch (error) {
       console.error('Error al alternar fecha del hábito:', error);
     }
   };
+
 
   // ✅ JSX que renderiza el calendario y la racha
   return (
