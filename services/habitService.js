@@ -2,13 +2,17 @@ import { v4 as uuidv4 } from 'uuid';
 import { cargarHabitos, guardarHabitos } from '../storage/habitStorage';
 
 // Crear hábito nuevo
-export const agregarHabito = async (texto) => {
+export const agregarHabito = async(nombre, descripcion = '', fechaLimite = null, diasSeleccionados = [], repeticion = 1) => {
   const habitos = await cargarHabitos();
   const nuevo = {
     id: uuidv4(),
-    nombre: texto,
+    nombre,
+    descripcion,
     completado: false,
     fechasCompletadas: [],
+    fechaLimite,
+    diasSeleccionados, // Ej: ['Lunes', 'Miércoles']
+    repeticion,      
   };
   const actualizados = [...habitos, nuevo];
   await guardarHabitos(actualizados);
@@ -24,16 +28,24 @@ export const eliminarHabito = async (id) => {
 };
 
 // Editar hábito
-export const editarHabito = async (id, nuevoTexto) => {
+export const editarHabito = async(id, nuevoNombre, nuevaDescripcion, nuevaFechaLimite, nuevosDias, nuevaRepeticion) => {
   const habitos = await cargarHabitos();
   const actualizados = habitos.map(h =>
-    h.id === id ? { ...h, nombre: nuevoTexto } : h
+    h.id === id
+      ? { ...h,
+          nombre: nuevoNombre,
+          descripcion: nuevaDescripcion,
+          fechaLimite: nuevaFechaLimite,
+          diasSeleccionados: nuevosDias,
+          repeticion: nuevaRepeticion
+        }
+      : h
   );
   await guardarHabitos(actualizados);
   return actualizados;
 };
 
-// Marcar hábito como completado (simple toggle booleano)
+// Marcar hábito como completado
 export const marcarCompletado = async (id) => {
   const habitos = await cargarHabitos();
   const actualizados = habitos.map(h =>
@@ -43,7 +55,7 @@ export const marcarCompletado = async (id) => {
   return actualizados;
 };
 
-// (Opcional) Toggle una fecha específica para un hábito
+// Toggle fecha específica
 export const toggleFechaHabito = async (id, fecha) => {
   const habitos = await cargarHabitos();
   const actualizados = habitos.map(h => {

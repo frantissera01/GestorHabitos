@@ -23,6 +23,8 @@ export default function HomeScreen() {
   const [modoAgrupacion, setModoAgrupacion] = useState('hoy');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [mostrarCalendario, setMostrarCalendario] = useState(false);
+
 
 
   // Cargar hábitos
@@ -220,9 +222,26 @@ export default function HomeScreen() {
         </View>
       </Modal>
 
-      <View style={{ minHeight: 300, marginTop: 20 }}>
-        <HabitCalendar habitos={habitos} />
-      </View>
+      <TouchableOpacity
+        onPress={() => setMostrarCalendario(!mostrarCalendario)}
+        style={{
+          backgroundColor: '#2196F3',
+          padding: 10,
+          marginHorizontal: 20,
+          borderRadius: 8
+        }}
+      >
+        <Text style={{ color: 'white', textAlign: 'center' }}>
+          {mostrarCalendario ? '⬆️ Ocultar calendario' : '📅 Mostrar calendario'}
+        </Text>
+      </TouchableOpacity>
+
+      {mostrarCalendario && (
+        <View style={{ minHeight: 300, marginTop: 20 }}>
+          <HabitCalendar habitos={habitos} />
+        </View>
+      )}
+
     </ScrollView>
   );
 }

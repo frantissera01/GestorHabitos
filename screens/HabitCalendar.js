@@ -1,19 +1,20 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet, Modal, Pressable } from 'react-native';
 import { Calendar } from 'react-native-calendars';
 import { cargarHabitos } from '../storage/habitStorage';
 import { toggleFechaHabito } from '../services/habitService';
-import { calcularRacha } from '../utils/habitUtils';
 
-export default function HabitCalendar() {
+export default function HabitCalendar({ habito }) {
   const [completedDates, setCompletedDates] = useState({});
-  const [racha, setRacha] = useState(0);
+  const [modalVisible, setModalVisible] = useState(false);
+  const [habitosDelDia, setHabitosDelDia] = useState([]);
+  const [fechaSeleccionada, setFechaSeleccionada] = useState('');
 
   useEffect(() => {
-    if (!habito || !Array.isArray(habito.fechas)) return;
+    if (!habito || !Array.isArray(habito.fechasCompletadas)) return;
 
     const fechas = {};
-    habito.fechas.forEach(fecha => {
+    habito.fechasCompletadas.forEach(fecha => {
       fechas[fecha] = {
         marked: true,
         dotColor: '#00adf5',
@@ -22,45 +23,40 @@ export default function HabitCalendar() {
     });
 
     setCompletedDates(fechas);
-    setRacha(calcularRacha(Object.keys(fechas)));
-  }, [habito.fechas]);
+  }, [habito]);
 
   const manejarPresionDia = async (day) => {
     const fecha = day.dateString;
+    setFechaSeleccionada(fecha);
 
     try {
       const habitos = await cargarHabitos();
-      const primerHabito = habitos[0];
-      if (!primerHabito) return;
+      const cumplidos = habitos.filter(h =>
+        Array.isArray(h.fechas) && h.fechas.includes(fecha)
+      );
 
-      const habitosActualizados = await toggleFechaHabito(primerHabito.id, fecha);
-
-      const nuevasFechas = {};
-      habitosActualizados.forEach(hab => {
-        if (Array.isArray(hab.fechas)) {
-          hab.fechas.forEach(f => {
-            nuevasFechas[f] = {
+      setHabitosDelDia(cumplidos);
+      const fechasTotales = {};
+        habitos.forEach(h => {
+          (h.fechasCompletadas || []).forEach(f => {
+            fechasTotales[f] = {
               marked: true,
               dotColor: '#00adf5',
               selectedColor: '#e0f7fa',
             };
           });
-        }
-      });
+        });
 
-      setCompletedDates(nuevasFechas); // ✅ actualiza el estado
-      setRacha(calcularRacha(Object.keys(nuevasFechas || {}))); // ✅ usa nuevasFechas
+        setCompletedDates(fechasTotales);
+        setModalVisible(true);
     } catch (error) {
-      console.error('Error al alternar fecha del hábito:', error);
+      console.error('Error al cargar hábitos del día:', error);
     }
   };
 
-
-  // ✅ JSX que renderiza el calendario y la racha
   return (
     <View style={styles.container}>
       <Text style={styles.titulo}>Calendario de hábitos</Text>
-      <Text style={styles.racha}>🔥 Racha actual: {racha}</Text>
 
       <Calendar
         markedDates={completedDates}
@@ -71,8 +67,38 @@ export default function HabitCalendar() {
           arrowColor: '#00adf5',
         }}
       />
+
+      {/* Modal para mostrar hábitos cumplidos */}
+      <Modal
+        visible={modalVisible}
+        animationType="slide"
+        transparent={true}
+        onRequestClose={() => setModalVisible(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContainer}>
+            <Text style={styles.modalTitle}>
+              Hábitos cumplidos el {fechaSeleccionada}
+            </Text>
+            {habitosDelDia.length > 0 ? (
+              habitosDelDia.map((h, index) => (
+                <Text key={index} style={styles.habitoTexto}>• {h.nombre}</Text>
+              ))
+            ) : (
+              <Text style={styles.habitoTexto}>No se cumplió ningún hábito.</Text>
+            )}
+            <Pressable
+              style={styles.botonCerrar}
+              onPress={() => setModalVisible(false)}
+            >
+              <Text style={{ color: '#fff' }}>Cerrar</Text>
+            </Pressable>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
+
 }
 
 const styles = StyleSheet.create({
@@ -86,9 +112,32 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     marginBottom: 8
   },
-  racha: {
+  modalOverlay: {
+    flex: 1,
+    justifyContent: 'center',
+    backgroundColor: 'rgba(0,0,0,0.4)',
+    padding: 20,
+  },
+  modalContainer: {
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    padding: 20,
+    elevation: 5,
+  },
+  modalTitle: {
     fontSize: 18,
-    marginBottom: 16,
-    color: '#f57c00'
-  }
+    fontWeight: 'bold',
+    marginBottom: 10,
+  },
+  habitoTexto: {
+    fontSize: 16,
+    marginVertical: 2,
+  },
+  botonCerrar: {
+    marginTop: 20,
+    backgroundColor: '#2196F3',
+    padding: 10,
+    borderRadius: 8,
+    alignItems: 'center',
+  },
 });
