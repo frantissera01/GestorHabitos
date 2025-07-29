@@ -30,7 +30,7 @@ export const eliminarHabito = async (id) => {
 // Editar hábito
 export const editarHabito = async(id, nuevoNombre, nuevaDescripcion, nuevaFechaLimite, nuevosDias, nuevaRepeticion) => {
   const habitos = await cargarHabitos();
-  const actualizados = habitos.map(h =>
+  const actualizados = p(h =>
     h.id === id
       ? { ...h,
           nombre: nuevoNombre,

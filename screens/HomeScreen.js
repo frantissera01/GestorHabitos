@@ -80,9 +80,9 @@ export default function HomeScreen() {
   };
 
   // Toggle completado
-  const handleToggleCompletado = (id) => {
+  const handleToggleCompletado = async (id) => {
     const hoy = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
-
+    
     const nuevosHabitos = habitos.map(habito => {
       if (habito.id === id) {
         const fechasActualizadas = habito.fechas?.includes(hoy)
@@ -98,7 +98,11 @@ export default function HomeScreen() {
     });
 
     setHabitos(nuevosHabitos);
-    guardarHabitos(nuevosHabitos);
+    try {
+      await guardarHabitos(nuevosHabitos);
+    } catch (error) {
+      console.error("Error guardando hábitos:", error);
+    }
   };
 
 
