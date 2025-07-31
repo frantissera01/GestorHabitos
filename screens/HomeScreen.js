@@ -32,6 +32,7 @@ export default function HomeScreen() {
     try {
       setLoading(true);
       const cargados = await cargarHabitos();
+      console.log('🧾 Cantidad de hábitos cargados:', cargados.length);
       setHabitos(cargados);
       setError(null);
     } catch (e) {

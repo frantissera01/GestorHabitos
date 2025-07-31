@@ -2,9 +2,13 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const STORAGE_KEY = '@habitos';
 
-// Guardar hábitos
 export const guardarHabitos = async (habitos) => {
   try {
+    if (!Array.isArray(habitos)) {
+      console.error('guardarHabitos: parámetro no es un array:', habitos);
+      return; // Salir sin intentar guardar
+    }
+
     const datosConFechas = habitos.map((h) => ({
       ...h,
       fechasCompletadas: h.fechasCompletadas || [],
@@ -16,6 +20,7 @@ export const guardarHabitos = async (habitos) => {
     console.error('Error al guardar hábitos:', error);
   }
 };
+
 
 // Cargar hábitos
 export const cargarHabitos = async () => {

@@ -138,13 +138,13 @@ const HabitModal = ({ visible, onClose, onGuardar, habitToEdit }) => {
           {
             text: "Aceptar",
             onPress: () => {
-              guardarHabitos({
+              guardarHabitos([{
                 nombre,
                 descripcion: descripcionFinal,
                 fechas: [],
                 dias: [],
                 repeticion: '1',
-              });
+              }]);
             },
           },
           {
@@ -168,31 +168,39 @@ const HabitModal = ({ visible, onClose, onGuardar, habitToEdit }) => {
       [
         {
           text: "Guardar",
-          onPress: () => {
-            const fechasArray = Object.keys(fechasSeleccionadas);
+          onPress: async () => {
+            try {
+              const fechasArray = Object.keys(fechasSeleccionadas);
 
-            if (fechasArray.length > 30) {
-              alert('No podés seleccionar más de 30 días.');
-              return;
+              if (fechasArray.length > 30) {
+                alert('No podés seleccionar más de 30 días.');
+                return;
+              }
+
+              const nuevoHabito = {
+                nombre,
+                descripcion: descripcionFinal,
+                fechas: fechasArray,
+                diasSemana: diasSemanaSeleccionados,
+                repeticion,
+              };
+
+              if (habitToEdit) {
+                actualizarHabito(habitToEdit.id, nuevoHabito);
+              } else {
+                const existentes = await cargarHabitos(); // 👈 traer los anteriores
+                const nuevos = [...(existentes || []), nuevoHabito];
+                await guardarHabitos(nuevos); // 👈 asegurate de usar await
+              }
+
+              onClose();
+              limpiarCampos();
+            } catch (error) {
+              console.error("❌ Error al guardar el hábito:", error);
+              alert("Hubo un problema al guardar el hábito.");
             }
+          }
 
-            const nuevoHabito = {
-              nombre,
-              descripcion: descripcionFinal,
-              fechas: fechasArray,
-              diasSemana: diasSemanaSeleccionados,
-              repeticion,
-            };
-
-            if (habitToEdit) {
-              actualizarHabito(habitToEdit.id, nuevoHabito);
-            } else {
-              guardarHabitos(nuevoHabito);
-            }
-
-            onClose();
-            limpiarCampos();
-          },
         },
         {
           text: "Cancelar",
