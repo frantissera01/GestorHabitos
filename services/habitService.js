@@ -2,7 +2,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { cargarHabitos, guardarHabitos } from '../storage/habitStorage';
 
 // Crear hábito nuevo
-export const agregarHabito = async(nombre, descripcion = '', fechaLimite = null, diasSeleccionados = [], repeticion = 1) => {
+export const agregarHabito = async(nombre, descripcion = '', fechaLimite = null, diasSemanaSeleccionados = [], repeticion = 1) => {
   const habitos = await cargarHabitos();
   const nuevo = {
     id: uuidv4(),
@@ -11,7 +11,7 @@ export const agregarHabito = async(nombre, descripcion = '', fechaLimite = null,
     completado: false,
     fechasCompletadas: [],
     fechaLimite,
-    diasSeleccionados, // Ej: ['Lunes', 'Miércoles']
+    diasSemanaSeleccionados, // Ej: ['Lunes', 'Miércoles']
     repeticion,      
   };
   const actualizados = [...habitos, nuevo];
@@ -30,13 +30,13 @@ export const eliminarHabito = async (id) => {
 // Editar hábito
 export const editarHabito = async(id, nuevoNombre, nuevaDescripcion, nuevaFechaLimite, nuevosDias, nuevaRepeticion) => {
   const habitos = await cargarHabitos();
-  const actualizados = p(h =>
+  const actualizados = habitos.map(h =>
     h.id === id
       ? { ...h,
           nombre: nuevoNombre,
           descripcion: nuevaDescripcion,
           fechaLimite: nuevaFechaLimite,
-          diasSeleccionados: nuevosDias,
+          diasSemanaSeleccionados: nuevosDias,
           repeticion: nuevaRepeticion
         }
       : h

@@ -28,7 +28,7 @@ export default function Estadistica() {
         keyExtractor={(item) => item.id}
         renderItem={({ item }) => (
           <View style={styles.item}>
-            <Text style={styles.nombre}>{item.texto}</Text>
+            <Text style={styles.nombre}>{item.nombre}</Text>
             <Text style={styles.count}>
               Completados: {item.fechasCompletadas?.length || 0}
             </Text>

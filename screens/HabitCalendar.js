@@ -32,7 +32,7 @@ export default function HabitCalendar({ habito }) {
     try {
       const habitos = await cargarHabitos();
       const cumplidos = habitos.filter(h =>
-        Array.isArray(h.fechas) && h.fechas.includes(fecha)
+        Array.isArray(h.fechasCompletadas) && h.fechasCompletadas.includes(fecha)
       );
 
       setHabitosDelDia(cumplidos);

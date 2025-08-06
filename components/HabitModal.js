@@ -11,11 +11,12 @@ import {
 } from 'react-native';
 import { Calendar } from 'react-native-calendars';
 import { Alert } from 'react-native';
-import { guardarHabitos } from '../storage/habitStorage';
+import { guardarHabitos, cargarHabitos } from '../storage/habitStorage';
+import { editarHabito } from '../services/habitService';
 
 const diasSemana = ['L', 'M', 'Mi', 'J', 'V', 'S', 'D'];
 
-const HabitModal = ({ visible, onClose, onGuardar, habitToEdit }) => {
+const HabitModal = ({ visible, onClose, onGuardar, habitToEdit, setHabitToEdit }) => {
   const [nombre, setNombre] = useState('');
   const [descripcion, setDescripcion] = useState('');
   const [fechasSeleccionadas, setFechasSeleccionadas] = useState({});
@@ -74,6 +75,11 @@ const HabitModal = ({ visible, onClose, onGuardar, habitToEdit }) => {
     return fechas;
   };
 
+  const limpiarCampos = () => {
+    // resetea los inputs acá...
+    setHabitToEdit(null);
+    // otros setState para inputs también
+  };
 
   const seleccionarFechaRango = (fechaSeleccionada) => {
     if (!fechaInicio || (fechaInicio && fechaFin)) {
@@ -118,7 +124,6 @@ const HabitModal = ({ visible, onClose, onGuardar, habitToEdit }) => {
     }
   };
 
-
   const handleGuardar = () => {
     if (!nombre.trim()) {
       Alert.alert("Falta el nombre", "Por favor ingresá el nombre del hábito.");
@@ -138,10 +143,10 @@ const HabitModal = ({ visible, onClose, onGuardar, habitToEdit }) => {
           {
             text: "Aceptar",
             onPress: () => {
-              guardarHabitos([{
+              guardarHabitos([{ 
                 nombre,
                 descripcion: descripcionFinal,
-                fechas: [],
+                fechasCompletadas: [],
                 dias: [],
                 repeticion: '1',
               }]);
@@ -156,11 +161,44 @@ const HabitModal = ({ visible, onClose, onGuardar, habitToEdit }) => {
       return;
     }
 
-    // Armar resumen para confirmación
     const resumen = `Nombre: ${nombre}
   Descripción: ${descripcionFinal}
-  Días: ${hayDias ? diasSeleccionados.join(', ') : 'No definido'}
+  Días: ${hayDias ? diasSemanaSeleccionados.join(', ') : 'No definido'}
   Repetición: ${repeticion || '1'} veces por día`;
+
+    const guardarHabitacionAsync = async () => {
+      try {
+        const fechasArray = Object.keys(fechasSeleccionadas);
+
+        if (fechasArray.length > 30) {
+          alert('No podés seleccionar más de 30 días.');
+          return;
+        }
+
+        const nuevoHabito = {
+          nombre,
+          descripcion: descripcionFinal,
+          fechas: fechasArray,
+          fechasCompletadas: [],
+          diasSemana: diasSemanaSeleccionados,
+          repeticion,
+        };
+
+        if (habitToEdit) {
+          await editarHabito(habitToEdit.id, nuevoHabito);
+        } else {
+          const existentes = await cargarHabitos();
+          const nuevos = [...(existentes || []), nuevoHabito];
+          await guardarHabitos(nuevos);
+        }
+
+        onClose();
+        limpiarCampos();
+      } catch (error) {
+        console.error("❌ Error al guardar el hábito:", error);
+        alert("Hubo un problema al guardar el hábito.");
+      }
+    };
 
     Alert.alert(
       "Confirmar hábito",
@@ -168,47 +206,16 @@ const HabitModal = ({ visible, onClose, onGuardar, habitToEdit }) => {
       [
         {
           text: "Guardar",
-          onPress: async () => {
-            try {
-              const fechasArray = Object.keys(fechasSeleccionadas);
-
-              if (fechasArray.length > 30) {
-                alert('No podés seleccionar más de 30 días.');
-                return;
-              }
-
-              const nuevoHabito = {
-                nombre,
-                descripcion: descripcionFinal,
-                fechas: fechasArray,
-                diasSemana: diasSemanaSeleccionados,
-                repeticion,
-              };
-
-              if (habitToEdit) {
-                actualizarHabito(habitToEdit.id, nuevoHabito);
-              } else {
-                const existentes = await cargarHabitos(); // 👈 traer los anteriores
-                const nuevos = [...(existentes || []), nuevoHabito];
-                await guardarHabitos(nuevos); // 👈 asegurate de usar await
-              }
-
-              onClose();
-              limpiarCampos();
-            } catch (error) {
-              console.error("❌ Error al guardar el hábito:", error);
-              alert("Hubo un problema al guardar el hábito.");
-            }
-          }
-
+          onPress: () => {
+            guardarHabitacionAsync();
+          },
         },
         {
           text: "Cancelar",
           style: "cancel",
-        }
+        },
       ]
-    ); // <-- cierre del segundo Alert.alert
-
+    );
   }; // <-- cierre de handleGuardar
 
 

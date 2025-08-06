@@ -58,6 +58,7 @@ export default function HomeScreen() {
   };
 
   const handleAgregarHabito = async (nuevoHabito) => {
+    console.log('handleAgregarHabito llamado con:', nuevoHabito);
     if (habitToEdit) {
       const nuevosHabitos = habitos.map((h) =>
         h.id==habitToEdit.id ? {...h, ...nuevoHabito } : h
@@ -86,13 +87,13 @@ export default function HomeScreen() {
     
     const nuevosHabitos = habitos.map(habito => {
       if (habito.id === id) {
-        const fechasActualizadas = habito.fechas?.includes(hoy)
-          ? habito.fechas.filter(fecha => fecha !== hoy) // desmarcar
-          : [...(habito.fechas || []), hoy];              // marcar
+        const fechasActualizadas = habito.fechasCompletadas?.includes(hoy)
+          ? habito.fechasCompletadas.filter(fecha => fecha !== hoy) // desmarcar
+          : [...(habito.fechasCompletadas || []), hoy];              // marcar
 
         return {
           ...habito,
-          fechas: fechasActualizadas,
+          fechasCompletadas: fechasActualizadas,
         };
       }
       return habito;
@@ -121,9 +122,9 @@ export default function HomeScreen() {
   const hoy = new Date().toISOString().split('T')[0];
   let habitosRender = [...habitos];
 
-  if (modoAgrupacion === 'racha') {
-    habitosRender.sort((a, b) => calcularRacha(b.fechas || []) - calcularRacha(a.fechas || []));
-  } else if (modoAgrupacion === 'nombre') {
+    if (modoAgrupacion === 'racha') {
+      habitosRender.sort((a, b) => calcularRacha(b.fechasCompletadas || []) - calcularRacha(a.fechasCompletadas || []));
+    } else if (modoAgrupacion === 'nombre') {
     habitosRender.sort((a, b) => a.nombre.localeCompare(b.nombre));
   }
 
@@ -151,9 +152,9 @@ export default function HomeScreen() {
       {modoAgrupacion === 'hoy' ? (
         <>
           <Text style={styles.tituloSeccion}>📗 Completados hoy</Text>
-          {habitos.filter(h => h.fechas?.includes(hoy)).map(item => (
+            {habitos.filter(h => h.fechasCompletadas?.includes(hoy)).map(item => (
             <HabitItem
-              key={item.id}
+              key={item.id ?? index} 
               habito={item}
               onToggle={handleToggleCompletado}
               onEditar={abrirModalEditar}
@@ -162,9 +163,11 @@ export default function HomeScreen() {
           ))}
 
           <Text style={styles.tituloSeccion}>📕 Pendientes hoy</Text>
-          {habitos.filter(h => !h.fechas?.includes(hoy)).map(item => (
+          {habitos
+            .filter(h => !h.fechas?.includes(hoy)) 
+            .map((item, index) => (
             <HabitItem
-              key={item.id}
+              key={item.id ?? index}
               habito={item}
               onToggle={handleToggleCompletado}
               onEditar={abrirModalEditar}
@@ -173,9 +176,9 @@ export default function HomeScreen() {
           ))}
         </>
       ) : (
-        habitosRender.map(item => (
+        habitosRender.map((item, index) => (
           <HabitItem
-            key={item.id}
+            key={item.id ?? index}
             habito={item}
             onToggle={handleToggleCompletado}
             onEditar={abrirModalEditar}
@@ -189,6 +192,9 @@ export default function HomeScreen() {
         onClose={() => setModalVisible(false)}
         onGuardar={handleAgregarHabito}
         habitToEdit={habitToEdit}
+        setHabitToEdit={setHabitToEdit}  
+        habitos={habitos}
+        setHabitos={setHabitos}
       />
 
       <Modal

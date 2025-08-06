@@ -7,7 +7,7 @@ import { ScrollView } from 'react-native';
 const HabitItem = ({ habito, onEditar, onEliminar, onToggle }) => {
   const esDeHoy = () => {
     const hoy = new Date().toISOString().split('T')[0];
-    return habito.fechas?.includes(hoy);
+    return habito.fechasCompletadas?.includes(hoy);
   };
 
   return (
@@ -17,7 +17,7 @@ const HabitItem = ({ habito, onEditar, onEliminar, onToggle }) => {
       </ScrollView>
       
       <Text style={styles.racha}>
-        🔥 Racha: {calcularRacha(habito.fechas || [])} días
+        🔥 Racha: {calcularRacha(habito.fechasCompletadas || [])} días
       </Text>
 
       <View style={styles.acciones}>
