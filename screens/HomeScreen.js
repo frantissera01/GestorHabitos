@@ -152,9 +152,9 @@ export default function HomeScreen() {
       {modoAgrupacion === 'hoy' ? (
         <>
           <Text style={styles.tituloSeccion}>📗 Completados hoy</Text>
-            {habitos.filter(h => h.fechasCompletadas?.includes(hoy)).map(item => (
+            {habitos.filter(h => h.fechasCompletadas?.includes(hoy)).map((item, index) => (
             <HabitItem
-              key={item.id ?? index} 
+              key={item.id} 
               habito={item}
               onToggle={handleToggleCompletado}
               onEditar={abrirModalEditar}
@@ -164,10 +164,10 @@ export default function HomeScreen() {
 
           <Text style={styles.tituloSeccion}>📕 Pendientes hoy</Text>
           {habitos
-            .filter(h => !h.fechas?.includes(hoy)) 
-            .map((item, index) => (
+            .filter(h => !h.fechasCompletadas?.includes(hoy)) 
+            .map(item => (
             <HabitItem
-              key={item.id ?? index}
+              key={item.id}
               habito={item}
               onToggle={handleToggleCompletado}
               onEditar={abrirModalEditar}
@@ -176,9 +176,9 @@ export default function HomeScreen() {
           ))}
         </>
       ) : (
-        habitosRender.map((item, index) => (
+        habitosRender.map(item => (
           <HabitItem
-            key={item.id ?? index}
+            key={item.id}
             habito={item}
             onToggle={handleToggleCompletado}
             onEditar={abrirModalEditar}

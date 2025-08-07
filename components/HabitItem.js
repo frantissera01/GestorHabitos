@@ -11,7 +11,7 @@ const HabitItem = ({ habito, onEditar, onEliminar, onToggle }) => {
   };
 
   return (
-    <View style={{ flex: 1}}>
+    <View style={styles.container}>
       <ScrollView horizontal showsHorizontalScrollIndicator={false}>
         <Text style={styles.nombreTexto}>{habito.nombre}</Text>
       </ScrollView>

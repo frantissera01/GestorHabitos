@@ -25,7 +25,6 @@ const HabitModal = ({ visible, onClose, onGuardar, habitToEdit, setHabitToEdit }
   const [mostrarCalendario, setMostrarCalendario] = useState(false);
   const [fechaInicio, setFechaInicio] = useState(null);
   const [fechaFin, setFechaFin] = useState(null);
-  const [habitos, setHabitos] = useState([]); // ✅ debe ser array
 
 
   useEffect(() => {
@@ -34,13 +33,13 @@ const HabitModal = ({ visible, onClose, onGuardar, habitToEdit, setHabitToEdit }
       setDescripcion(habitToEdit.descripcion || '');
       setFechasSeleccionadas(habitToEdit.fechasSeleccionadas || {});
       setDiasSemanaSeleccionados(habitToEdit.diasSemanaSeleccionados || []);
-      setRepeticion(String(habitToEdit.repeticion || 1));
+      setRepeticion(Number(habitToEdit.repeticion || 1));
     } else {
       setNombre('');
       setDescripcion('');
       setFechasSeleccionadas({});
       setDiasSemanaSeleccionados([]);
-      setRepeticion('1');
+      setRepeticion(1);
     }
   }, [habitToEdit]);
 
@@ -100,7 +99,7 @@ const HabitModal = ({ visible, onClose, onGuardar, habitToEdit, setHabitToEdit }
       const diffDias = (fin - inicio) / (1000 * 60 * 60 * 24);
 
       if (diffDias < 0 || diffDias > 30) {
-        alert('Seleccioná una fecha válida (máx 30 días desde la inicial)');
+        Alert.alert('Titulo','Seleccioná una fecha válida (máx 30 días desde la inicial)');
         return;
       }
 
@@ -133,7 +132,7 @@ const HabitModal = ({ visible, onClose, onGuardar, habitToEdit, setHabitToEdit }
     const descripcionFinal = descripcion.trim() || 'Sin descripción';
     const hayRango = false;
     const hayDias = diasSemanaSeleccionados && diasSemanaSeleccionados.length > 0;
-    const hayRepeticion = repeticion && repeticion !== '1'; // Asumimos '1' como default
+    const hayRepeticion = repeticion && repeticion !== 1; // Asumimos 1 como default
 
     if (!hayRango && !hayDias && !hayRepeticion) {
       Alert.alert(
@@ -148,7 +147,7 @@ const HabitModal = ({ visible, onClose, onGuardar, habitToEdit, setHabitToEdit }
                 descripcion: descripcionFinal,
                 fechasCompletadas: [],
                 dias: [],
-                repeticion: '1',
+                repeticion: 1,
               }]);
             },
           },
@@ -164,14 +163,14 @@ const HabitModal = ({ visible, onClose, onGuardar, habitToEdit, setHabitToEdit }
     const resumen = `Nombre: ${nombre}
   Descripción: ${descripcionFinal}
   Días: ${hayDias ? diasSemanaSeleccionados.join(', ') : 'No definido'}
-  Repetición: ${repeticion || '1'} veces por día`;
+  Repetición: ${repeticion || 1} veces por día`;
 
     const guardarHabitacionAsync = async () => {
       try {
         const fechasArray = Object.keys(fechasSeleccionadas);
 
         if (fechasArray.length > 30) {
-          alert('No podés seleccionar más de 30 días.');
+          Alert.alert('Titulo','No podés seleccionar más de 30 días.');
           return;
         }
 
@@ -196,7 +195,7 @@ const HabitModal = ({ visible, onClose, onGuardar, habitToEdit, setHabitToEdit }
         limpiarCampos();
       } catch (error) {
         console.error("❌ Error al guardar el hábito:", error);
-        alert("Hubo un problema al guardar el hábito.");
+        Alert.alert('Titulo',"Hubo un problema al guardar el hábito.");
       }
     };
 

@@ -1,5 +1,5 @@
-import AsyncStorage from '@react-native-async-storage/async-storage';
-
+import AsyncStorageModule from '@react-native-async-storage/async-storage';
+const AsyncStorage = AsyncStorageModule.default ?? AsyncStorageModule;
 const STORAGE_KEY = '@habitos';
 
 export const guardarHabitos = async (habitos) => {

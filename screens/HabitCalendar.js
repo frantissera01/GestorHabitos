@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, Modal, Pressable } from 'react-native';
 import { Calendar } from 'react-native-calendars';
 import { cargarHabitos } from '../storage/habitStorage';
-import { toggleFechaHabito } from '../services/habitService';
+
 
 export default function HabitCalendar({ habito }) {
   const [completedDates, setCompletedDates] = useState({});
