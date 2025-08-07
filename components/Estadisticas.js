@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, FlatList } from 'react-native';
-import { cargarHabitos } from '../storage/habitStorage';
+import { cargarHabitos } from './services/HabitStorage';
 
 export default function Estadistica() {
   const [habitos, setHabitos] = useState([]);

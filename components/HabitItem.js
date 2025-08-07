@@ -1,100 +1,24 @@
 import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
-import { calcularRacha } from '../utils/habitUtils';
-import { ScrollView } from 'react-native';
+import { View, Text, StyleSheet } from 'react-native';
 
-const HabitItem = ({ habito, onEditar, onEliminar, onToggle }) => {
-  const esDeHoy = () => {
-    const hoy = new Date().toISOString().split('T')[0];
-    return habito.fechasCompletadas?.includes(hoy);
-  };
-
+export default function HabitItem({ habit }) {
+  const { nombre, descripcion, fechas, dias, repeticiones } = habit;
   return (
-    <View style={styles.container}>
-      <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-        <Text style={styles.nombreTexto}>{habito.nombre}</Text>
-      </ScrollView>
-      
-      <Text style={styles.racha}>
-        🔥 Racha: {calcularRacha(habito.fechasCompletadas || [])} días
-      </Text>
-
-      <View style={styles.acciones}>
-       <TouchableOpacity
-          onPress={() => onToggle(habito.id)}
-          style={[
-            styles.botonCompletar,
-            esDeHoy() && styles.botonDesmarcar
-          ]}
-        >
-          <Text style={{color: esDeHoy() ? '#f44336' : '#4CAF50'}}>
-            {esDeHoy() ? 'Desmarcar' : 'Completado'}
-          </Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity onPress={() => onEditar(habito)} style={styles.botonEditar}>
-          <Ionicons name="create-outline" size={20} color="#4caf50" />
-        </TouchableOpacity>
-
-        <TouchableOpacity onPress={() => onEliminar(habito.id)} style={styles.botonEliminar}>
-          <Ionicons name="trash-outline" size={20} color="#f44336" />
-        </TouchableOpacity>
-      </View>
+    <View style={itemStyles.container}>
+      <Text style={itemStyles.title}>{nombre}</Text>
+      {descripcion ? <Text>{descripcion}</Text> : null}
+      {fechas.length === 2 && (
+        <Text>
+          {fechas[0]} → {fechas[1]}
+        </Text>
+      )}
+      {dias.length > 0 && <Text>Días: {dias.join(', ')}</Text>}
+      <Text>Repeticiones/día: {repeticiones}</Text>
     </View>
   );
-};
+}
 
-const styles = StyleSheet.create({
-  container: {
-    backgroundColor: '#f0f0f0',
-    padding: 12,
-    marginVertical: 6,
-    borderRadius: 10,
-    flex: 1,
-    flexWrap: 'nowrap',
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  racha: {
-    fontSize: 14,
-    color: 'orange',
-    marginTop: 4
-  },
-  nombreContainer: {
-    maxWidth: '70%',  // o el % que quieras
-    overflow: 'hidden',
-  },
-  nombreTexto: {
-    fontSize: 16,
-    paddingRight: 10,
-    color: 'black',
-  },
-  completado: {
-    color: '#4CAF50',
-  },
-  acciones: {
-    flexDirection: 'row',
-    gap: 12,
-    marginLeft: 12,
-  },
-  botonCompletar: {
-    marginRight: 15,
-    paddingVertical: 6,
-    paddingHorizontal: 10,
-    backgroundColor: '#d0f0d0',
-    borderRadius: 6,
-  },
-  botonEliminar: {
-    marginLeft: 10,
-  },
-  botonDesmarcar: {
-  borderColor: '#f44336',
-  borderWidth: 1,
-},
-
+const itemStyles = StyleSheet.create({
+  container: { padding: 12, borderBottomWidth: 1, borderColor: '#eee' },
+  title: { fontSize: 16, fontWeight: 'bold' },
 });
-
-export default HabitItem;
-
