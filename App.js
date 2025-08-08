@@ -1,64 +1,115 @@
-import React, { useState, useEffect } from 'react';
-import { SafeAreaView, View, FlatList, Button, Modal, StyleSheet, Text } from 'react-native';
-import HabitModal from './components/HabitModal';
-import HabitItem from './components/HabitItem';
-import HabitCalendar from './screens/HabitCalendar';
-import * as HabitService from './services/HabitService';
+// App.js
+import React, { useEffect, useState } from 'react';
+import { View, ActivityIndicator, Alert } from 'react-native';
+import HomeScreen from './screens/HomeScreen';
+import Onboarding from './screens/Onboarding';
+import ProfilePickerModal from './components/ProfilePickerModal';
+import * as ProfileService from './services/ProfileService';
 
 export default function App() {
-  const [habits, setHabits] = useState([]);
-  const [modalVisible, setModalVisible] = useState(false);
-  const [currentRange, setCurrentRange] = useState({ startDate: null, endDate: null });
+  const [loading, setLoading] = useState(true);
+  const [profiles, setProfiles] = useState([]);
+  const [selectedId, setSelectedId] = useState(null);
 
-  useEffect(() => { loadHabits(); }, []);
+  const [showPicker, setShowPicker] = useState(false);
+  const [showOnboarding, setShowOnboarding] = useState(false);
 
-  const loadHabits = async () => {
-    const data = await HabitService.getHabits();
-    setHabits(data);
+  useEffect(() => {
+    (async () => {
+      const list = await ProfileService.getProfiles();
+      setProfiles(list);
+      const sel = await ProfileService.getSelectedProfileId();
+      if (!list || list.length === 0) setShowOnboarding(true);
+      else if (!sel) setShowPicker(true);
+      setSelectedId(sel);
+      setLoading(false);
+    })();
+  }, []);
+
+  const reloadProfiles = async () => {
+    const list = await ProfileService.getProfiles();
+    setProfiles(list);
+    return list;
   };
 
-  const handleSave = async habit => {
-    const item = { id: Date.now().toString(), ...habit };
-    const updated = await HabitService.addHabit(item);
-    setHabits(updated);
-    setModalVisible(false);
+  const handleCreated = async (profile) => {
+    await ProfileService.setSelectedProfileId(profile.id);
+    await reloadProfiles();
+    setSelectedId(profile.id);
+    setShowOnboarding(false);
+    setShowPicker(false);
   };
 
-  const renderEmpty = () => (
-    <View style={styles.emptyContainer}>
-      <Text>No hay hábitos. Agregá uno para comenzar.</Text>
-    </View>
-  );
+  const handleCancelOnboarding = async () => {
+    setShowOnboarding(false);
+    const list = await reloadProfiles();
+    if (!selectedId && list.length > 0) setShowPicker(true);
+  };
+
+  const handleSelect = async (id) => {
+    await ProfileService.setSelectedProfileId(id);
+    setSelectedId(id);
+    setShowPicker(false);
+  };
+
+  const handleDeleteProfile = async (id) => {
+    try {
+      // (Versión simple) Solo elimina el perfil. Si querés re-asignar/borrar hábitos del perfil,
+      // lo hacemos luego con un ProfileOps separado.
+      await ProfileService.removeProfile(id);
+      const list = await reloadProfiles();
+
+      if (!list.length) {
+        await ProfileService.setSelectedProfileId(null);
+        setSelectedId(null);
+        setShowOnboarding(true);
+        setShowPicker(false);
+        return;
+      }
+      const sel = await ProfileService.getSelectedProfileId();
+      setSelectedId(sel);
+      setShowPicker(true);
+    } catch (e) {
+      Alert.alert('Error', 'No se pudo eliminar el perfil.');
+    }
+  };
+
+  if (loading) {
+    return <View style={{ flex:1, alignItems:'center', justifyContent:'center' }}><ActivityIndicator/></View>;
+  }
+
+  if (showOnboarding) {
+    return <Onboarding onCreated={handleCreated} onCancel={handleCancelOnboarding} />;
+  }
+
+  if (!selectedId) {
+    return (
+      <ProfilePickerModal
+        visible={true}
+        profiles={profiles}
+        onSelect={handleSelect}
+        onCreateNew={() => setShowOnboarding(true)}
+        onDelete={handleDeleteProfile}
+        onClose={() => {}}
+      />
+    );
+  }
 
   return (
-    <SafeAreaView style={styles.safeArea}>
-      <FlatList
-        ListHeaderComponent={<HabitCalendar onRangeChange={setCurrentRange} />}
-        data={habits.filter(h => {
-          if (!currentRange.startDate || !currentRange.endDate) return true;
-          return (
-            new Date(h.fechas[0]) >= new Date(currentRange.startDate) &&
-            new Date(h.fechas[1]) <= new Date(currentRange.endDate)
-          );
-        })}
-        keyExtractor={item => item.id}
-        renderItem={({ item }) => <HabitItem habit={item} />}
-        ListEmptyComponent={renderEmpty}
-        contentContainerStyle={habits.length === 0 && styles.flatEmpty}
+    <>
+      <HomeScreen
+        currentProfileId={selectedId}
+        profiles={profiles}
+        onChangeProfile={() => setShowPicker(true)}
       />
-      <View style={styles.buttonContainer}>
-        <Button title="Agregar Hábito" onPress={() => setModalVisible(true)} />
-      </View>
-      <Modal visible={modalVisible} animationType="slide">
-        <HabitModal visible={modalVisible} onSave={handleSave} onCancel={() => setModalVisible(false)} />
-      </Modal>
-    </SafeAreaView>
+      <ProfilePickerModal
+        visible={showPicker}
+        profiles={profiles}
+        onSelect={handleSelect}
+        onCreateNew={() => { setShowPicker(false); setShowOnboarding(true); }}
+        onDelete={handleDeleteProfile}
+        onClose={() => setShowPicker(false)}
+      />
+    </>
   );
 }
-
-const styles = StyleSheet.create({
-  safeArea: { flex: 1 },
-  buttonContainer: { padding: 16, backgroundColor: '#fff' },
-  emptyContainer: { flex: 1, justifyContent: 'center', alignItems: 'center', padding: 20 },
-  flatEmpty: { flexGrow: 1 },
-});
